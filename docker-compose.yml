@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    image: livezilla-server
+    container_name: livezilla-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Persist runtime-writable data so it survives container rebuilds.
+      - lz_config:/var/www/html/_config
+      - lz_uploads:/var/www/html/uploads
+      - lz_log:/var/www/html/_log
+      - lz_stats:/var/www/html/stats
+
+  db:
+    image: mariadb:10.6
+    container_name: livezilla-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_USER: ${MYSQL_USER}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - lz_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lz_config:
+  lz_uploads:
+  lz_log:
+  lz_stats:
+  lz_db:
