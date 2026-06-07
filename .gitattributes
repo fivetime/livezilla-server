@@ -1,0 +1,9 @@
+# Shell scripts must use LF, otherwise CRLF breaks the shebang inside the
+# Linux container (e.g. "#!/bin/sh\r": no such file or directory).
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Keep Docker-related files LF for consistency across platforms.
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+docker-compose.yml text eol=lf
