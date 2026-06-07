@@ -54,10 +54,30 @@ docker compose down       # stop, keep data
 docker compose down -v    # stop and wipe all data (fresh reinstall next time)
 ```
 
+### Prebuilt image (GHCR)
+
+A multi-architecture image (`linux/amd64` + `linux/arm64`) is published to the
+GitHub Container Registry, so it runs natively on x86 as well as ARM (Apple
+Silicon, ARM servers) — no emulation:
+
+```bash
+docker pull ghcr.io/fivetime/livezilla-server:latest
+```
+
+The image is built by a manually-triggered GitHub Actions workflow
+(`.github/workflows/docker-build.yml`): go to the repo's **Actions** tab →
+*Build Docker image* → **Run workflow**. To use the prebuilt image with compose
+instead of building locally, replace `build: .` with
+`image: ghcr.io/fivetime/livezilla-server:latest` in `docker-compose.yml`.
+
 ### Notes
 
 - **Data persistence** — `_config`, `uploads`, `_log`, `stats` and the database are
   stored in named Docker volumes, so they survive container rebuilds.
+- **Offline license activation** — this build already includes the LiveZilla Offline
+  Activator (`activate.php` and supporting files), needed since the online activation
+  service was discontinued in 2021. After installation, activate your key at
+  **http://localhost:8080/activate.php** — no internet connection required.
 - **Auto-removal of the installer** — for security, LiveZilla asks you to delete the
   `install/` folder after setup. The container does this automatically: once
   `_config/config.php` exists (i.e. installation finished), the entrypoint removes
